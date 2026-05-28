@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Docs as Code — план изучения</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --bg-elevated: #161b22;
+    --bg-hover: #1c2128;
+    --border: #30363d;
+    --border-muted: #21262d;
+    --text: #e6edf3;
+    --text-muted: #8b949e;
+    --text-dim: #6e7681;
+    --accent: #58a6ff;
+    --accent-hover: #79b8ff;
+    --success: #3fb950;
+    --success-bg: rgba(63, 185, 80, 0.12);
+    --warning: #d29922;
+    --danger: #f85149;
+    --radius: 8px;
+    --radius-sm: 6px;
+    --shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    min-height: 100vh;
+    padding: 32px 16px 80px;
+  }
+
+  .container { max-width: 960px; margin: 0 auto; }
+
+  header {
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  h1 {
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    background: linear-gradient(135deg, #58a6ff 0%, #3fb950 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .subtitle {
+    color: var(--text-muted);
+    font-size: 15px;
+    max-width: 700px;
+  }
+  .actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  button {
+    font-family: inherit;
+    font-size: 13px;
+    padding: 8px 14px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--bg-elevated);
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  button:hover { background: var(--bg-hover); border-color: var(--text-dim); }
+  button.danger { color: var(--danger); }
+  button.danger:hover { background: rgba(248, 81, 73, 0.1); border-color: var(--danger); }
+  button.primary { background: var(--accent); color: #0d1117; border-color: var(--accent); font-weight: 600; }
+  button.primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+
+  .overall-progress {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 32px;
+  }
+  .progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .progress-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .progress-value {
+    font-size: 14px;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .progress-bar {
+    height: 8px;
+    background: var(--border-muted);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent) 0%, var(--success) 100%);
+    border-radius: 999px;
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .phase {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 20px;
+    overflow: hidden;
+    transition: border-color 0.2s ease;
+  }
+  .phase.completed { border-color: var(--success); }
+
+  .phase-header {
+    padding: 18px 20px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    user-select: none;
+    transition: background 0.15s ease;
+  }
+  .phase-header:hover { background: var(--bg-hover); }
+
+  .phase-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    min-width: 0;
+  }
+  .phase-badge {
+    background: var(--border-muted);
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 999px;
+    flex-shrink: 0;
+    letter-spacing: 0.02em;
+  }
+  .phase.completed .phase-badge {
+    background: var(--success-bg);
+    color: var(--success);
+  }
+  .phase-title {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .phase-meta {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-shrink: 0;
+  }
+  .phase-progress-mini {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .chevron {
+    width: 16px;
+    height: 16px;
+    color: var(--text-muted);
+    transition: transform 0.2s ease;
+  }
+  .phase.open .chevron { transform: rotate(90deg); }
+
+  .phase-body {
+    display: none;
+    padding: 0 20px 20px;
+    border-top: 1px solid var(--border-muted);
+  }
+  .phase.open .phase-body { display: block; }
+
+  .phase-mini-bar {
+    height: 4px;
+    background: var(--border-muted);
+    border-radius: 999px;
+    overflow: hidden;
+    margin: 16px 0 20px;
+  }
+  .phase-mini-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 999px;
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .phase.completed .phase-mini-fill { background: var(--success); }
+
+  .section-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 10px;
+  }
+
+  .task {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border-muted);
+  }
+  .task:last-child { border-bottom: none; }
+
+  .task-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .task input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 1.5px solid var(--border);
+    border-radius: 4px;
+    background: var(--bg);
+    cursor: pointer;
+    position: relative;
+    flex-shrink: 0;
+    margin-top: 2px;
+    transition: all 0.15s ease;
+  }
+  .task input[type="checkbox"]:hover { border-color: var(--accent); }
+  .task input[type="checkbox"]:checked {
+    background: var(--success);
+    border-color: var(--success);
+  }
+  .task input[type="checkbox"]:checked::after {
+    content: "";
+    position: absolute;
+    left: 5px;
+    top: 1px;
+    width: 5px;
+    height: 10px;
+    border: solid #0d1117;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+  .task label {
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--text);
+    flex: 1;
+    line-height: 1.5;
+  }
+  .task.done label {
+    color: var(--text-dim);
+    text-decoration: line-through;
+  }
+
+  .task-actions {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+  .icon-btn {
+    background: transparent;
+    border: 1px solid transparent;
+    padding: 4px 6px;
+    border-radius: 4px;
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: all 0.15s ease;
+    font-size: 13px;
+    line-height: 1;
+  }
+  .icon-btn:hover {
+    background: var(--bg-hover);
+    border-color: var(--border);
+    color: var(--text);
+  }
+  .icon-btn svg {
+    width: 14px;
+    height: 14px;
+    display: block;
+  }
+
+  .task-comment {
+    display: none;
+    margin-top: 10px;
+    margin-left: 28px;
+  }
+  .task.comment-open .task-comment { display: block; }
+
+  .task-comment textarea {
+    width: 100%;
+    min-height: 60px;
+    padding: 8px 10px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 13px;
+    resize: vertical;
+    line-height: 1.5;
+  }
+  .task-comment textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  .task-comment textarea::placeholder { color: var(--text-dim); }
+
+  .task.has-comment .icon-btn[data-action="comment"] {
+    color: var(--accent);
+  }
+  .task.has-comment .icon-btn[data-action="comment"]::after {
+    content: "•";
+    margin-left: 2px;
+    color: var(--accent);
+  }
+
+  .save-indicator {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: var(--success-bg);
+    color: var(--success);
+    padding: 8px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    border: 1px solid var(--success);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    z-index: 100;
+  }
+  .save-indicator.show { opacity: 1; }
+
+  .loading {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+  }
+
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    padding: 16px;
+  }
+  .modal-backdrop.show { display: flex; }
+  .modal {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    max-width: 700px;
+    width: 100%;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--shadow);
+  }
+  .modal h3 {
+    font-size: 18px;
+    margin-bottom: 12px;
+  }
+  .modal pre {
+    flex: 1;
+    overflow: auto;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    font-family: "SF Mono", Monaco, Consolas, monospace;
+    font-size: 12px;
+    color: var(--text);
+    margin-bottom: 16px;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .modal-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+
+  [data-tooltip] {
+    position: relative;
+  }
+  [data-tooltip]:hover::before {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg);
+    color: var(--text);
+    padding: 5px 9px;
+    border-radius: 4px;
+    font-size: 11px;
+    white-space: nowrap;
+    border: 1px solid var(--border);
+    z-index: 50;
+    pointer-events: none;
+  }
+
+  @media (max-width: 600px) {
+    h1 { font-size: 24px; }
+    .phase-title { font-size: 15px; }
+    .phase-header { padding: 14px 16px; }
+    .phase-body { padding: 0 16px 16px; }
+    body { padding: 20px 12px 60px; }
+    .task-comment { margin-left: 0; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <div class="header-top">
+      <div>
+        <h1>📚 Docs as Code</h1>
+        <p class="subtitle">Персональный трекер изучения технологии и построения конвейера разработки документации</p>
+      </div>
+      <div class="actions">
+        <button id="btn-export-json">📥 JSON</button>
+        <button id="btn-export-md">📝 Markdown</button>
+        <button id="btn-reset" class="danger">↺ Сбросить</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="overall-progress">
+    <div class="progress-header">
+      <span class="progress-label">Общий прогресс</span>
+      <span class="progress-value" id="overall-value">0 / 0 · 0%</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="overall-fill" style="width: 0%"></div>
+    </div>
+  </div>
+
+  <div id="phases-container">
+    <div class="loading">Загрузка прогресса...</div>
+  </div>
+</div>
+
+<div class="save-indicator" id="save-indicator">✓ Сохранено</div>
+
+<div class="modal-backdrop" id="modal">
+  <div class="modal">
+    <h3 id="modal-title">Экспорт</h3>
+    <pre id="modal-content"></pre>
+    <div class="modal-actions">
+      <button id="modal-copy">📋 Копировать</button>
+      <button id="modal-download" class="primary">💾 Скачать</button>
+      <button id="modal-close">Закрыть</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const PHASES = [
+  {
+    id: "phase1",
+    badge: "Фаза 1 · 1–2 недели",
+    title: "Основы и базовая среда",
+    tasks: [
+      { id: "p1t1", text: "Прочитать о философии Docs as Code (Anne Gentle, Write the Docs)" },
+      { id: "p1t2", text: "Изучить Markdown, CommonMark, GitHub Flavored Markdown" },
+      { id: "p1t3", text: "Познакомиться с AsciiDoc и reStructuredText" },
+      { id: "p1t4", text: "Освоить основы Git: коммиты, ветки, merge, rebase" },
+      { id: "p1t5", text: "Установить VS Code и расширения (Markdown All in One, markdownlint, Prettier, GitLens, Code Spell Checker, Mermaid Preview)" },
+      { id: "p1t6", text: "Установить Git локально, создать аккаунт GitHub/GitLab" },
+      { id: "p1t7", text: "Создать репозиторий docs-sandbox с первой документацией" },
+      { id: "p1t8", text: "Практика: 3–5 страниц документации со структурой каталогов" }
+    ]
+  },
+  {
+    id: "phase2",
+    badge: "Фаза 2 · 2 недели",
+    title: "Генераторы статических сайтов",
+    tasks: [
+      { id: "p2t1", text: "Изучить варианты: MkDocs, Docusaurus, Antora, Sphinx, Hugo" },
+      { id: "p2t2", text: "Выбрать основной генератор (рекомендуется MkDocs Material)" },
+      { id: "p2t3", text: "Установить и настроить mkdocs.yml: навигация, поиск, темизация" },
+      { id: "p2t4", text: "Настроить версионирование (например, через mike)" },
+      { id: "p2t5", text: "Подключить Mermaid для диаграмм" },
+      { id: "p2t6", text: "Подключить PlantUML для UML-диаграмм" },
+      { id: "p2t7", text: "Подключить MathJax для формул (если нужно)" },
+      { id: "p2t8", text: "Опционально: попробовать Docusaurus или Sphinx для сравнения" }
+    ]
+  },
+  {
+    id: "phase3",
+    badge: "Фаза 3 · 1–2 недели",
+    title: "Качество и автоматизация локально",
+    tasks: [
+      { id: "p3t1", text: "Установить и настроить markdownlint-cli2" },
+      { id: "p3t2", text: "Настроить Vale с готовым набором правил (Google/Microsoft)" },
+      { id: "p3t3", text: "Подключить LanguageTool для русского языка" },
+      { id: "p3t4", text: "Настроить lychee или markdown-link-check для проверки ссылок" },
+      { id: "p3t5", text: "Добавить codespell для проверки опечаток" },
+      { id: "p3t6", text: "Установить pre-commit, создать .pre-commit-config.yaml" },
+      { id: "p3t7", text: "Написать собственный STYLEGUIDE.md для проекта" },
+      { id: "p3t8", text: "Изучить Microsoft и Google Developer Documentation Style Guide" }
+    ]
+  },
+  {
+    id: "phase4",
+    badge: "Фаза 4 · 1–2 недели",
+    title: "CI/CD и публикация",
+    tasks: [
+      { id: "p4t1", text: "Изучить синтаксис GitHub Actions или GitLab CI" },
+      { id: "p4t2", text: "Освоить Conventional Commits и автогенерацию changelog" },
+      { id: "p4t3", text: "Настроить workflow: линтеры на push в feature-ветки" },
+      { id: "p4t4", text: "Настроить preview-сборки на pull request (Netlify/Cloudflare)" },
+      { id: "p4t5", text: "Настроить автодеплой при merge в main" },
+      { id: "p4t6", text: "Выбрать и настроить хостинг (GitHub Pages / Cloudflare Pages / Read the Docs)" },
+      { id: "p4t7", text: "Проверить полный цикл: коммит → PR → деплой" }
+    ]
+  },
+  {
+    id: "phase5",
+    badge: "Фаза 5 · 2 недели",
+    title: "Экспорт и оформление по требованиям заказчика",
+    tasks: [
+      { id: "p5t1", text: "Установить Pandoc и освоить базовые конвертации: Markdown → DOCX, PDF, HTML" },
+      { id: "p5t2", text: "Изучить шаблоны DOCX в Pandoc (--reference-doc) для корпоративного оформления" },
+      { id: "p5t3", text: "Настроить генерацию PDF через XeLaTeX с поддержкой кириллицы (или LuaLaTeX)" },
+      { id: "p5t4", text: "Опционально: попробовать Typst как современную альтернативу LaTeX" },
+      { id: "p5t5", text: "Изучить требования ГОСТ к технической документации (ГОСТ 19, ГОСТ 34, ГОСТ 7.32)" },
+      { id: "p5t6", text: "Создать DOCX-шаблон с титульным листом, оглавлением, колонтитулами по ГОСТ" },
+      { id: "p5t7", text: "Настроить параметризацию через YAML front matter (заказчик, версия, гриф)" },
+      { id: "p5t8", text: "Добавить в CI/CD сборку DOCX/PDF артефактов наряду с HTML-сайтом" },
+      { id: "p5t9", text: "Освоить docxtemplater или python-docx для сложных программных шаблонов" },
+      { id: "p5t10", text: "Опционально: Asciidoctor PDF как альтернатива для AsciiDoc-проектов" }
+    ]
+  },
+  {
+    id: "phase6",
+    badge: "Фаза 6 · 2–3 недели",
+    title: "Продвинутые практики",
+    tasks: [
+      { id: "p6t1", text: "Изучить Diátaxis framework (diataxis.fr)" },
+      { id: "p6t2", text: "Реструктурировать docs-sandbox по Diátaxis: tutorials/how-to/reference/explanation" },
+      { id: "p6t3", text: "Настроить генерацию API-документации из OpenAPI (Redoc или Scalar)" },
+      { id: "p6t4", text: "Освоить версионирование документации для нескольких версий продукта" },
+      { id: "p6t5", text: "Попробовать локализацию (Crowdin/Weblate или i18n)" },
+      { id: "p6t6", text: "Освоить Diagram as Code: Mermaid, PlantUML, D2, Structurizr" },
+      { id: "p6t7", text: "Настроить скриншоты as Code через Playwright" },
+      { id: "p6t8", text: "Сделать тестируемые примеры кода (doctest или аналог)" }
+    ]
+  },
+  {
+    id: "phase7",
+    badge: "Фаза 7 · 2 недели",
+    title: "ИИ в контуре документации",
+    tasks: [
+      { id: "p7t1", text: "Установить Claude Code или расширение Continue в VS Code" },
+      { id: "p7t2", text: "Опробовать ИИ для генерации черновиков и рефакторинга текста" },
+      { id: "p7t3", text: "Опционально: попробовать локальные модели через Ollama" },
+      { id: "p7t4", text: "Получить API-ключ Anthropic Claude (или альтернативы)" },
+      { id: "p7t5", text: "Написать CI-скрипт: ИИ-ревью документации на pull request" },
+      { id: "p7t6", text: "Настроить ИИ-редактуру: проверка стиля, тона, соответствия стайлгайду и ГОСТ" },
+      { id: "p7t7", text: "Настроить автогенерацию release notes из коммитов" },
+      { id: "p7t8", text: "Опробовать автоматический перевод изменённых страниц" },
+      { id: "p7t9", text: "Настроить ИИ-разбор требований заказчика → структура документации" },
+      { id: "p7t10", text: "Автогенерация задач и чек-листов из текста ТЗ через ИИ" },
+      { id: "p7t11", text: "Применить промпт-кэширование для снижения стоимости API" },
+      { id: "p7t12", text: "Создать набор многоразовых промптов для типовых документов" }
+    ]
+  }
+];
+
+const STORAGE_KEY = "dac_tracker_v3";
+const OLD_STORAGE_KEY = "dac_tracker_v2";
+let state = {};
+let saveTimer = null;
+
+// === Storage ===
+async function loadState() {
+  try {
+    let result = await window.storage.get(STORAGE_KEY);
+    if (result && result.value) {
+      state = JSON.parse(result.value);
+    } else {
+      // Try migration from v2
+      try {
+        const oldResult = await window.storage.get(OLD_STORAGE_KEY);
+        if (oldResult && oldResult.value) {
+          const oldState = JSON.parse(oldResult.value);
+          state = migrateFromV2(oldState);
+          await window.storage.set(STORAGE_KEY, JSON.stringify(state));
+        }
+      } catch (e) {
+        // no old data
+      }
+    }
+  } catch (e) {
+    state = {};
+  }
+  // Initialize missing keys
+  PHASES.forEach(phase => {
+    if (!state[phase.id]) state[phase.id] = { tasks: {} };
+    phase.tasks.forEach(task => {
+      if (!state[phase.id].tasks[task.id]) {
+        state[phase.id].tasks[task.id] = { done: false, comment: "" };
+      }
+    });
+  });
+}
+
+function migrateFromV2(oldState) {
+  // v2 phases: phase1..phase6 (where old phase5 was "Продвинутые практики" and phase6 was "ИИ")
+  // v3 phases: phase1..phase4 same, phase5 new (Pandoc/ГОСТ), phase6 = old phase5, phase7 = old phase6
+  const newState = {};
+  // Map: phase1-4 same
+  ["phase1", "phase2", "phase3", "phase4"].forEach(pid => {
+    if (oldState[pid]) newState[pid] = oldState[pid];
+  });
+  // Old phase5 (Advanced practices, p5t1..p5t8) → new phase6
+  if (oldState.phase5) {
+    newState.phase6 = { tasks: {} };
+    for (let i = 1; i <= 8; i++) {
+      const oldId = `p5t${i}`;
+      const newId = `p6t${i}`;
+      if (oldState.phase5.tasks[oldId]) {
+        newState.phase6.tasks[newId] = oldState.phase5.tasks[oldId];
+      }
+    }
+  }
+  // Old phase6 (AI, p6t1..p6t8) → new phase7 (first 8 task IDs map directly)
+  if (oldState.phase6) {
+    newState.phase7 = { tasks: {} };
+    // Map old p6t1..p6t8 to new p7t1..p7t8 (similar topics, mostly preserved order)
+    const oldToNew = {
+      "p6t1": "p7t1", // Claude Code / Continue
+      "p6t2": "p7t2", // drafts and refactoring
+      "p6t3": "p7t3", // Ollama
+      "p6t4": "p7t4", // API key
+      "p6t5": "p7t5", // CI script review
+      "p6t6": "p7t7", // release notes (renumbered)
+      "p6t7": "p7t8", // translation (renumbered)
+      "p6t8": "p7t11" // prompt caching (renumbered)
+    };
+    Object.entries(oldToNew).forEach(([oldId, newId]) => {
+      if (oldState.phase6.tasks[oldId]) {
+        newState.phase7.tasks[newId] = oldState.phase6.tasks[oldId];
+      }
+    });
+  }
+  return newState;
+}
+
+async function saveState() {
+  try {
+    await window.storage.set(STORAGE_KEY, JSON.stringify(state));
+    showSaveIndicator();
+  } catch (e) {
+    console.error("Save failed:", e);
+  }
+}
+
+function debouncedSave() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveState, 400);
+}
+
+function showSaveIndicator() {
+  const el = document.getElementById("save-indicator");
+  el.classList.add("show");
+  clearTimeout(showSaveIndicator._t);
+  showSaveIndicator._t = setTimeout(() => el.classList.remove("show"), 1200);
+}
+
+// === Google Calendar link ===
+function buildGoogleCalendarUrl(phaseTitle, taskText) {
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  tomorrow.setHours(10, 0, 0, 0);
+  const end = new Date(tomorrow.getTime() + 60 * 60 * 1000);
+
+  const fmt = (d) => {
+    const pad = (n) => String(n).padStart(2, "0");
+    return d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) +
+           "T" + pad(d.getHours()) + pad(d.getMinutes()) + "00";
+  };
+
+  const params = new URLSearchParams({
+    action: "TEMPLATE",
+    text: `[Docs as Code] ${taskText}`,
+    dates: `${fmt(tomorrow)}/${fmt(end)}`,
+    details: `Задача из плана изучения Docs as Code.\n\nЭтап: ${phaseTitle}\n\nПодробности: задача из персонального трекера. Перенесите время и длительность под себя.`
+  });
+
+  return `https://calendar.google.com/calendar/render?${params.toString()}`;
+}
+
+// === Rendering ===
+function render() {
+  const container = document.getElementById("phases-container");
+  container.innerHTML = "";
+
+  PHASES.forEach((phase, idx) => {
+    const ps = state[phase.id];
+    const completed = phase.tasks.filter(t => ps.tasks[t.id].done).length;
+    const total = phase.tasks.length;
+    const pct = total ? Math.round((completed / total) * 100) : 0;
+    const isComplete = completed === total && total > 0;
+
+    const phaseEl = document.createElement("div");
+    phaseEl.className = "phase" + (isComplete ? " completed" : "");
+    phaseEl.dataset.phaseId = phase.id;
+
+    phaseEl.innerHTML = `
+      <div class="phase-header">
+        <div class="phase-title-wrap">
+          <span class="phase-badge">${phase.badge}</span>
+          <span class="phase-title">${phase.title}</span>
+        </div>
+        <div class="phase-meta">
+          <span class="phase-progress-mini">${completed}/${total} · ${pct}%</span>
+          <svg class="chevron" viewBox="0 0 16 16" fill="currentColor"><path d="M6 4l4 4-4 4V4z"/></svg>
+        </div>
+      </div>
+      <div class="phase-body">
+        <div class="phase-mini-bar"><div class="phase-mini-fill" style="width: ${pct}%"></div></div>
+        <div class="section-label">Задачи</div>
+        <div class="tasks"></div>
+      </div>
+    `;
+
+    phaseEl.querySelector(".phase-header").addEventListener("click", () => {
+      phaseEl.classList.toggle("open");
+    });
+
+    const tasksContainer = phaseEl.querySelector(".tasks");
+    phase.tasks.forEach(task => {
+      const taskState = ps.tasks[task.id];
+      const hasComment = taskState.comment && taskState.comment.trim().length > 0;
+
+      const taskEl = document.createElement("div");
+      taskEl.className = "task" + (taskState.done ? " done" : "") + (hasComment ? " has-comment" : "");
+      taskEl.dataset.taskId = task.id;
+
+      taskEl.innerHTML = `
+        <div class="task-row">
+          <input type="checkbox" id="${task.id}" ${taskState.done ? "checked" : ""}>
+          <label for="${task.id}">${task.text}</label>
+          <div class="task-actions">
+            <button class="icon-btn" data-action="comment" data-tooltip="Комментарий">
+              <svg viewBox="0 0 16 16" fill="currentColor"><path d="M2.75 2.5h10.5a.75.75 0 01.75.75v7.5a.75.75 0 01-.75.75H8.61l-2.69 2.69a.75.75 0 01-1.28-.53V11.5H2.75a.75.75 0 01-.75-.75v-7.5a.75.75 0 01.75-.75z"/></svg>
+            </button>
+            <button class="icon-btn" data-action="calendar" data-tooltip="В Google Календарь">
+              <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.75 0a.75.75 0 01.75.75V2h5V.75a.75.75 0 011.5 0V2h1.25c.97 0 1.75.78 1.75 1.75v10.5A1.75 1.75 0 0113.25 16H2.75A1.75 1.75 0 011 14.25V3.75C1 2.78 1.78 2 2.75 2H4V.75A.75.75 0 014.75 0zM2.5 6v8.25c0 .14.11.25.25.25h10.5a.25.25 0 00.25-.25V6h-11z"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="task-comment">
+          <textarea placeholder="Заметки по задаче: ссылки, мысли, что получилось, что не получилось..." data-task-id="${task.id}">${taskState.comment || ""}</textarea>
+        </div>
+      `;
+
+      const cb = taskEl.querySelector('input[type="checkbox"]');
+      cb.addEventListener("change", () => {
+        state[phase.id].tasks[task.id].done = cb.checked;
+        taskEl.classList.toggle("done", cb.checked);
+        debouncedSave();
+        updateProgress();
+      });
+
+      taskEl.querySelector('[data-action="comment"]').addEventListener("click", (e) => {
+        e.stopPropagation();
+        taskEl.classList.toggle("comment-open");
+        if (taskEl.classList.contains("comment-open")) {
+          taskEl.querySelector("textarea").focus();
+        }
+      });
+
+      taskEl.querySelector('[data-action="calendar"]').addEventListener("click", (e) => {
+        e.stopPropagation();
+        const url = buildGoogleCalendarUrl(phase.title, task.text);
+        window.open(url, "_blank", "noopener,noreferrer");
+      });
+
+      const ta = taskEl.querySelector("textarea");
+      ta.addEventListener("input", () => {
+        state[phase.id].tasks[task.id].comment = ta.value;
+        const hasContent = ta.value.trim().length > 0;
+        taskEl.classList.toggle("has-comment", hasContent);
+        debouncedSave();
+      });
+
+      tasksContainer.appendChild(taskEl);
+    });
+
+    if (idx === 0 && completed < total) {
+      phaseEl.classList.add("open");
+    }
+
+    container.appendChild(phaseEl);
+  });
+
+  updateProgress();
+}
+
+function updateProgress() {
+  let total = 0, done = 0;
+  PHASES.forEach(phase => {
+    total += phase.tasks.length;
+    done += phase.tasks.filter(t => state[phase.id].tasks[t.id].done).length;
+  });
+  const pct = total ? Math.round((done / total) * 100) : 0;
+  document.getElementById("overall-value").textContent = `${done} / ${total} · ${pct}%`;
+  document.getElementById("overall-fill").style.width = pct + "%";
+
+  PHASES.forEach(phase => {
+    const phaseEl = document.querySelector(`[data-phase-id="${phase.id}"]`);
+    if (!phaseEl) return;
+    const completed = phase.tasks.filter(t => state[phase.id].tasks[t.id].done).length;
+    const totalP = phase.tasks.length;
+    const pctP = totalP ? Math.round((completed / totalP) * 100) : 0;
+    phaseEl.querySelector(".phase-mini-fill").style.width = pctP + "%";
+    phaseEl.querySelector(".phase-progress-mini").textContent = `${completed}/${totalP} · ${pctP}%`;
+    const isComplete = completed === totalP && totalP > 0;
+    phaseEl.classList.toggle("completed", isComplete);
+  });
+}
+
+// === Export ===
+function exportJSON() {
+  const data = {
+    exported_at: new Date().toISOString(),
+    phases: PHASES.map(phase => ({
+      id: phase.id,
+      title: phase.title,
+      badge: phase.badge,
+      tasks: phase.tasks.map(t => ({
+        text: t.text,
+        completed: !!state[phase.id].tasks[t.id].done,
+        comment: state[phase.id].tasks[t.id].comment || ""
+      }))
+    }))
+  };
+  return JSON.stringify(data, null, 2);
+}
+
+function exportMarkdown() {
+  let total = 0, done = 0;
+  PHASES.forEach(p => {
+    total += p.tasks.length;
+    done += p.tasks.filter(t => state[p.id].tasks[t.id].done).length;
+  });
+  const pct = total ? Math.round((done / total) * 100) : 0;
+  const now = new Date().toLocaleDateString("ru-RU");
+
+  let md = `# Docs as Code — мой прогресс\n\n`;
+  md += `_Экспортировано: ${now}_\n\n`;
+  md += `**Общий прогресс:** ${done} / ${total} (${pct}%)\n\n---\n\n`;
+
+  PHASES.forEach(phase => {
+    const ps = state[phase.id];
+    const completed = phase.tasks.filter(t => ps.tasks[t.id].done).length;
+    md += `## ${phase.title}\n\n`;
+    md += `_${phase.badge} · ${completed}/${phase.tasks.length} выполнено_\n\n`;
+    phase.tasks.forEach(t => {
+      const ts = ps.tasks[t.id];
+      const check = ts.done ? "x" : " ";
+      md += `- [${check}] ${t.text}\n`;
+      if (ts.comment && ts.comment.trim()) {
+        const commentLines = ts.comment.trim().split("\n").map(l => `      > ${l}`).join("\n");
+        md += `${commentLines}\n`;
+      }
+    });
+    md += `\n`;
+  });
+
+  return md;
+}
+
+function downloadFile(content, filename, mime) {
+  const blob = new Blob([content], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function showModal(title, content, filename, mime) {
+  document.getElementById("modal-title").textContent = title;
+  document.getElementById("modal-content").textContent = content;
+  document.getElementById("modal").classList.add("show");
+
+  document.getElementById("modal-copy").onclick = async () => {
+    try {
+      await navigator.clipboard.writeText(content);
+      document.getElementById("modal-copy").textContent = "✓ Скопировано";
+      setTimeout(() => {
+        document.getElementById("modal-copy").textContent = "📋 Копировать";
+      }, 1500);
+    } catch (e) {
+      alert("Не удалось скопировать. Используйте кнопку «Скачать».");
+    }
+  };
+  document.getElementById("modal-download").onclick = () => {
+    downloadFile(content, filename, mime);
+  };
+}
+
+document.getElementById("btn-export-json").addEventListener("click", () => {
+  showModal("Экспорт JSON", exportJSON(), "docs-as-code-progress.json", "application/json");
+});
+
+document.getElementById("btn-export-md").addEventListener("click", () => {
+  showModal("Экспорт Markdown", exportMarkdown(), "docs-as-code-progress.md", "text/markdown");
+});
+
+document.getElementById("btn-reset").addEventListener("click", async () => {
+  if (!confirm("Сбросить весь прогресс и комментарии? Это действие нельзя отменить.")) return;
+  state = {};
+  PHASES.forEach(phase => {
+    state[phase.id] = { tasks: {} };
+    phase.tasks.forEach(task => {
+      state[phase.id].tasks[task.id] = { done: false, comment: "" };
+    });
+  });
+  await saveState();
+  render();
+});
+
+document.getElementById("modal-close").addEventListener("click", () => {
+  document.getElementById("modal").classList.remove("show");
+});
+document.getElementById("modal").addEventListener("click", e => {
+  if (e.target.id === "modal") {
+    document.getElementById("modal").classList.remove("show");
+  }
+});
+
+(async () => {
+  await loadState();
+  render();
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Docs as Code — план изучения</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header id="app-header">
+  <div class="container">
+    <div class="header-top">
+      <div>
+        <h1>📚 Docs as Code</h1>
+        <p class="subtitle">Персональный трекер изучения технологии и построения конвейера разработки документации</p>
+      </div>
+      <div class="actions">
+        <div class="eval-mode-toggle">
+          <button class="mode-btn" data-mode="integration">⚡ Автоматический</button>
+          <button class="mode-btn" data-mode="manual">✍ Ручной</button>
+        </div>
+        <button id="btn-import-questions">📦 Вопросы</button>
+        <button id="btn-import-json">📂 Импорт</button>
+        <button id="btn-export-json">📥 JSON</button>
+        <button id="btn-export-md">📝 Markdown</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="page-body">
+  <div class="container">
+
+    <div class="overall-progress">
+      <div class="progress-header">
+        <span class="progress-label">Общий прогресс</span>
+        <span class="progress-value" id="overall-value">0 / 0 · 0%</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="overall-fill" style="width: 0%"></div>
+      </div>
+    </div>
+
+    <div id="phases-container">
+      <div class="loading">Загрузка прогресса...</div>
+    </div>
+
+  </div>
+</div>
+
+<input type="file" id="file-import" accept=".json" style="display:none">
+<input type="file" id="file-import-questions" accept=".json" style="display:none">
+<div class="save-indicator" id="save-indicator">✓ Сохранено</div>
+
+<div class="modal-backdrop" id="modal">
+  <div class="modal">
+    <h3 id="modal-title">Экспорт</h3>
+    <pre id="modal-content"></pre>
+    <div class="modal-actions">
+      <button id="modal-copy">📋 Копировать</button>
+      <button id="modal-download" class="primary">💾 Скачать</button>
+      <button id="modal-close">Закрыть</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://accounts.google.com/gsi/client" async></script>
+<script src="config.js"></script>
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

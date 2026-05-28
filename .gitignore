@@ -1,0 +1,29 @@
+.env
+# OS
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Editor
+.vscode/
+.idea/
+*.sublime-workspace
+
+# Node (if tooling is added later)
+node_modules/
+npm-debug.log*
+
+# Local config with OAuth credentials (do not commit)
+config.js
+
+# Local launcher (path is machine-specific)
+start.bat
+docs as code.bat
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Claude Code local settings
+.claude/
