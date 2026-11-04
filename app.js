@@ -235,6 +235,8 @@ function mergeQuestionsData(data) {
 
 // === Score logic ===
 
+const TASK_PASS_SCORE = 1.5;
+
 // Weighted average: difficulty is the weight (1/2/3). Returns null if no scores set.
 function calcWeightedScore(taskQuestions) {
   let weightedSum = 0, totalWeight = 0;
@@ -248,7 +250,7 @@ function calcWeightedScore(taskQuestions) {
   return totalWeight > 0 ? weightedSum / totalWeight : null;
 }
 
-// Task checkbox is lockable only when all questions are scored AND weighted avg > 2
+// Tasks with questions require all scores and a passing weighted average.
 function canCheckTask(taskQuestions) {
   if (!taskQuestions.length) return true;
   const allScored = taskQuestions.every(q => {
@@ -257,7 +259,7 @@ function canCheckTask(taskQuestions) {
   });
   if (!allScored) return false;
   const ws = calcWeightedScore(taskQuestions);
-  return ws !== null && ws > 2;
+  return ws !== null && ws >= TASK_PASS_SCORE;
 }
 
 // Update the ⌀ badge in the task row
@@ -273,7 +275,7 @@ function updateTaskWeightedScore(taskId) {
   }
   const str = Number.isInteger(score * 10) ? score.toFixed(1) : score.toFixed(1);
   el.textContent = `⌀ ${str}`;
-  el.className = "task-wscore" + (score > 2 ? " wscore-hi" : score >= 1 ? " wscore-mid" : " wscore-lo");
+  el.className = "task-wscore" + (score >= TASK_PASS_SCORE ? " wscore-hi" : score >= 1 ? " wscore-mid" : " wscore-lo");
 }
 
 // Temporarily show a notice under the task
@@ -832,7 +834,6 @@ function render() {
         ${hasQuestions ? '<div class="task-questions"></div>' : ""}
       `;
 
-      // Checkbox — locked when task has questions and score ≤ 2
       const cb = taskEl.querySelector('input[type="checkbox"]');
       cb.addEventListener("change", () => {
         if (cb.checked && hasQuestions) {
@@ -840,10 +841,11 @@ function render() {
             cb.checked = false;
             const ws = calcWeightedScore(taskQuestions);
             const allScored = taskQuestions.every(q => questionsState[q.id]?.score != null);
+            const passScore = TASK_PASS_SCORE.toLocaleString("ru-RU");
             showTaskNotice(taskEl,
               !allScored
-                ? "Сначала оцените все вопросы — нужна средневзвешенная ⌀ > 2"
-                : `Средневзвешенная ⌀ ${ws.toFixed(1)} — нужно больше 2`
+                ? `Сначала оцените все вопросы. Средневзвешенная оценка должна быть не ниже ${passScore}.`
+                : `Средневзвешенная оценка ${ws.toLocaleString("ru-RU", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}. Для зачёта нужно не менее ${passScore}.`
             );
             return;
           }
